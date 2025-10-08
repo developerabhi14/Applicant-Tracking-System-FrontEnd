@@ -1,23 +1,31 @@
 import React, { useState} from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login(){
     const [email, setEmail]=useState("");
     const [password, setPassword]=useState("");
     const [error, setError]=useState("");
     const navigate=useNavigate();
+    const{ login } =useAuth();
     
     const handleSubmit =async (e) => {
         e.preventDefault();
         setError("");
 
         try{
-            const response=await axios.post("http://127.0.0.1:8000/auth/token",{
-                username: email,
+            const response=await axios.post("http://localhost:8000/auth/login",{
+                email: email,
                 password: password
             });
-            localStorage.setItem('token', response.data.access_token);
+            console.log(response)
+
+            const {access_token, user}=response.data
+           
+            localStorage.setItem('token', access_token);
+            localStorage.setItem('user', JSON.stringify(user))
+            login(access_token, user)
             navigate('/dashboard');
         }catch(err){
             setError("Invalid email or password")
